@@ -71,37 +71,38 @@ fun interpStm
         
 
 
-fun interpExp (IdExp id, table) = (lookup(table, id), table)
-    |   interpExp (NumExp n, table) = (n, table)
-    |   interpExp (OpExp(e1, oper, e2), table) = 
+    and interpExp (IdExp id, table) = (lookup(table, id), table)
+        |   interpExp (NumExp n, table) = (n, table)
+        |   interpExp (OpExp(e1, oper, e2), table) = 
+                let
+                val (v1, table1) = interpExp (e1, table)
+                val (v2, table2) = interpExp (e2, table1)
+                in
+                    (case oper of
+                        Plus => (v1 + v2)
+                        | Minus => (v1 - v2)
+                        | Times => (v1 * v2)
+                        | Div => (v1 div v2),
+                    table2)
+                end
+        |   interpExp (EseqExp(s, e), table) = 
             let
-              val (v1, table1) = interpExp (e1, table)
-              val (v2, table2) = interpExp (e2, table1)
+            val table1 = interpStm (s, table)
+            val (v2, table2) = interpExp (e, table1)
             in
-                (case oper of
-                    Plus => (v1 + v2)
-                    | Minus => (v1 - v2)
-                    | Times => (v1 * v2)
-                    | Div => (v1 div v2)
-                table2)
+            (v2, table2)
             end
-    |   interpExp (EseqExp(s, e), table) = 
-        let
-          val table1 = interpStm (s, table)
-          val (v2, table2) = interpExp (e, table1)
-        in
-          (v2, table2)
-        end
 
-fun interpExpList (expList, table) =
-    case expList of
-        [] => table
-    | e::rest => 
-        let
-          val (v, table1) = interpExp(expList, table)
-        in
-          (print(Int.toString v); interpExpList(rest, table1))
-        end
+    and interpExpList (expList, table) =
+        case expList of
+            [] => table
+        | e::rest => 
+            let
+            val (v, table1) = interpExp(e, table)
+            in
+            (print(Int.toString v); interpExpList(rest, table1))
+            end
 
-fun interp () =
+fun interp (stm) =
+    (interpStm(stm, []); ())
     
