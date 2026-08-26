@@ -37,3 +37,6 @@ fun lookup (table, id) =
     case table of
         [] => raise Fail "variable not found"
     | (id1, v1)::rest => if (id = id1) then v1 else lookup(rest, id)
+
+fun update (table, id, int) =
+    (id, int)::table;
