@@ -9,6 +9,7 @@ datatype stm = CompoundStm of stm * stm
 and exp = IdExp of id | NumExp of int | OpExp of exp * binop * exp | EseqExp of stm * exp
 
 
+(* Exercise 1 *)
 val prog =
     CompoundStm(AssignStm("a", OpExp(NumExp 5, Plus, NumExp 3)),
         CompoundStm(AssignStm("b",
@@ -29,4 +30,10 @@ and maxargsExp (IdExp _) = 0
     |   maxargsExp (OpExp(e1, _, e2)) = Int.max(maxargsExp e1, maxargsExp e2)
     |   maxargsExp (EseqExp(s, e)) = Int.max(maxargsExp e, maxargs s)
 
-fun interp (stm) = 
+(* Exercise 2: Interpreter *)
+(* fun interp (stm) =  *)
+
+fun lookup (table, id) =
+    case table of
+        [] => raise Fail "variable not found"
+    | (id1, v1)::rest => if (id = id1) then v1 else lookup(rest, id)
