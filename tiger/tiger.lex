@@ -10,8 +10,7 @@ fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 
 %% 
 %%
-(* "/*" => (Tokens.RCOMMENT(yypos, yypos+2));
-"*/" => (Tokens.LCOMMENT(yypos, yypos+2)); *)
+
 
 \n	=> (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 [0-9]+ => (Tokens.INT(valOf(Int.fromString yytext), yypos, yypos+size yytext));
@@ -59,7 +58,9 @@ fun eof() = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 
 [a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext, yypos, yypos + size yytext));
 
-[\ \t]+ => (continue()); 
+
+
+[ \t]+ => (continue()); 
 . => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
 
 
