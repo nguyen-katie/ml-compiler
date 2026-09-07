@@ -4,18 +4,23 @@ type lexresult = Tokens.token
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 val commentDepth = ref 0
+val stringBuf = ref ""
+val stringStart = ref 0
+val inString = ref false
 fun err(p1,p2) = ErrorMsg.error p1
 
 fun eof() = 
     let val pos = hd(!linePos) 
     in 
-        (if !commentDepth > 0 then ErrorMsg.error pos "comment is not closed at end of func" else ());
+        (if (!commentDepth > 0 orelse !inString) 
+        then ErrorMsg.error pos "eof error" 
+        else ());
         Tokens.EOF(pos,pos) 
     end
 
 
 %% 
-%s COMMENT;
+%s COMMENT STRING;
 %%
 
 
@@ -63,7 +68,7 @@ fun eof() =
 <INITIAL>"of" => (Tokens.OF(yypos, yypos+2));
 <INITIAL>"nil" => (Tokens.NIL(yypos, yypos+3));
 
-[<INITIAL>a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext, yypos, yypos + size yytext));
+<INITIAL>[a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext, yypos, yypos + size yytext));
 
 
 <INITIAL>"/*" => (commentDepth := 1; YYBEGIN COMMENT; continue());
@@ -72,7 +77,10 @@ fun eof() =
 <COMMENT>[\n] => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
 <COMMENT>. => (continue());
 
-
+<INITIAL>"\"" => (inString := false; stringBuf := ""; stringStart := yypos; YYBEGIN STRING; continue());
+<STRING>"\"" => (inString := true; YYBEGIN INITIAL; Tokens.STRING(!stringBuf, !stringStart, yypos+1));
+<STRING>[\n] => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+<STRING>. => (stringBuf := !stringBuf ^ yytext; continue());
 
 [ \t]+ => (continue()); 
 . => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());

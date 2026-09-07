@@ -1,1 +1,5 @@
-var , 123
+var s := "hi"
+var x   /* a comment */ 123
+/* outer /* nested */ still in comment */ 42
+"hello"
+"tab\there
