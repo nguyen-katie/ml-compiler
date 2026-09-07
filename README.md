@@ -6,7 +6,7 @@ Members of team: Katie Nguyen
 
 ## How you handled comments
 
-I handled comments by first defining a COMMENT state. Now, when the beginning comment symbol appears ("/*"), the lexer will enter the COMMENT state until the end ("*/").
+I handled comments by first defining a COMMENT state. Now, when the beginning comment symbol appears ("/\*"), the lexer will enter the COMMENT state until the end ("\*/").
 
 To account for comment nesting, I added a commentDepth reference that increments every time a new comment is nested and decrements every time a comment is ended. That way, when eof is ran, it can check if there are any nested comments based on if the depth is 0 or not before ending successfully.
 
